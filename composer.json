@@ -1,0 +1,54 @@
+{
+    "name": "scratcher28/php-exif",
+    "description": "Object-Oriented EXIF parsing",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Tom Van Herreweghe",
+            "homepage": "http://theanalogguy.be",
+            "role": "Developer"
+        }
+    ],
+    "keywords": ["EXIF", "IPTC", "jpeg", "tiff", "exiftool", "FFmpeg", "FFprobe", "ImageMagick", "Imagick"],
+    "require": {
+        "php": ">=7.2",
+        "neitanod/forceutf8": "^2.0.4",
+        "php-ffmpeg/php-ffmpeg": "^0.17.0"
+    },
+    "require-dev": {
+        "php-parallel-lint/php-parallel-lint": "^1.2",
+        "phpmd/phpmd": "^2.9",
+        "phpunit/phpunit": "^9.3",
+        "sebastian/phpcpd": ">=4.1",
+        "friendsofphp/php-cs-fixer": ">=2.17",
+	"squizlabs/php_codesniffer": "^3.5"
+    },
+    "suggest": {
+        "lib-exiftool": "Use perl lib exiftool as adapter",
+        "ext-exif": "Use exif PHP extension as adapter",
+        "FFmpeg": "Use FFmpeg/FFprobe as adapter",
+        "ImageMagick": "Use ImageMagick as adapter"
+    },
+    "autoload": {
+        "psr-0": {
+            "PHPExif": "lib/"
+        }
+    },
+    "scripts": {
+        "check-code-style": [
+            "vendor/bin/phpcs --standard=PSR2 ./lib/"
+        ],
+        "run-tests": [
+            "vendor/bin/phpunit -c phpunit.xml.dist",
+            "vendor/bin/phpunit --coverage-clover=coverage.xml"
+        ],
+        "validate-files": [
+            "vendor/bin/parallel-lint --exclude vendor --exclude imagick ."
+        ]
+    },
+    "config": {
+        "sort-packages": true
+    },
+    "prefer-stable": true
+}
