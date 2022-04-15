@@ -27,7 +27,6 @@ class Exiftool implements MapperInterface
     const APERTURE                 = 'Composite:Aperture';
     const APPROXIMATEFOCUSDISTANCE = 'XMP-aux:ApproximateFocusDistance';
     const ARTIST                   = 'IFD0:Artist';
-    const CAPTION                  = 'XMP-acdsee';
     const CAPTIONABSTRACT          = 'IPTC:Caption-Abstract';
     const COLORSPACE               = 'ExifIFD:ColorSpace';
     const COPYRIGHT                = 'IFD0:Copyright';
@@ -56,13 +55,14 @@ class Exiftool implements MapperInterface
     const GPSLONGITUDE             = 'GPS:GPSLongitude';
     const GPSALTITUDE              = 'GPS:GPSAltitude';
     const IMGDIRECTION             = 'GPS:GPSImgDirection';
-    const DESCRIPTION              = 'ExifIFD:ImageDescription ';
+    const DESCRIPTION              = 'IFD0:ImageDescription';
     const DESCRIPTION_XMP          = 'XMP-dc:Description';
     const MAKE                     = 'IFD0:Make';
     const LENS                     = 'ExifIFD:LensModel';
     const LENS_ID                  = 'Composite:LensID';
     const SUBJECT                  = 'XMP-dc:Subject';
     const CONTENTIDENTIFIER        = 'Apple:ContentIdentifier';
+    const MEDIA_GROUP_UUID         = 'Apple:MediaGroupUUID';
     const MICROVIDEOOFFSET         = 'XMP-GCamera:MicroVideoOffset';
     const SUBLOCATION              = 'IPTC2:Sublocation';
     const CITY                     = 'IPTC2:City';
@@ -80,6 +80,7 @@ class Exiftool implements MapperInterface
     const MAKE_QUICKTIME              = 'QuickTime:Make';
     const MODEL_QUICKTIME             = 'QuickTime:Model';
     const CONTENTIDENTIFIER_QUICKTIME = 'QuickTime:ContentIdentifier';
+    const CONTENTIDENTIFIER_KEYS      = 'Keys:ContentIdentifier';
     const GPSLATITUDE_QUICKTIME       = 'Composite:GPSLatitude';
     const GPSLONGITUDE_QUICKTIME      = 'Composite:GPSLongitude';
     const GPSALTITUDE_QUICKTIME       = 'Composite:GPSAltitude';
@@ -105,8 +106,6 @@ class Exiftool implements MapperInterface
         self::APERTURE                 => Exif::APERTURE,
         self::ARTIST                   => Exif::AUTHOR,
         self::MODEL                    => Exif::CAMERA,
-        self::CAPTION                  => Exif::CAPTION,
-        self::DESCRIPTION_XMP          => Exif::CAPTION,
         self::COLORSPACE               => Exif::COLORSPACE,
         self::COPYRIGHT                => Exif::COPYRIGHT,
         self::DATETIMEORIGINAL         => Exif::CREATION_DATE,
@@ -139,8 +138,10 @@ class Exiftool implements MapperInterface
         self::LENS                     => Exif::LENS,
         self::LENS_ID                  => Exif::LENS,
         self::DESCRIPTION              => Exif::DESCRIPTION,
+        self::DESCRIPTION_XMP          => Exif::DESCRIPTION,
         self::SUBJECT                  => Exif::KEYWORDS,
         self::CONTENTIDENTIFIER        => Exif::CONTENTIDENTIFIER,
+        self::MEDIA_GROUP_UUID         => Exif::CONTENTIDENTIFIER,
         self::DATETIMEORIGINAL_QUICKTIME  => Exif::CREATION_DATE,
         self::DATETIMEORIGINAL_AVI        => Exif::CREATION_DATE,
         self::DATETIMEORIGINAL_WEBM       => Exif::CREATION_DATE,
@@ -150,6 +151,7 @@ class Exiftool implements MapperInterface
         self::MAKE_QUICKTIME              => Exif::MAKE,
         self::MODEL_QUICKTIME             => Exif::CAMERA,
         self::CONTENTIDENTIFIER_QUICKTIME => Exif::CONTENTIDENTIFIER,
+        self::CONTENTIDENTIFIER_KEYS      => Exif::CONTENTIDENTIFIER,
         self::GPSLATITUDE_QUICKTIME       => Exif::LATITUDE,
         self::GPSLONGITUDE_QUICKTIME      => Exif::LONGITUDE,
         self::GPSALTITUDE_QUICKTIME       => Exif::ALTITUDE,
@@ -227,7 +229,8 @@ class Exiftool implements MapperInterface
                 case self::DATETIMEORIGINAL_WMV:
                     // DATETIMEORIGINAL_APPLE contains data on timezone
                     // only set value if DATETIMEORIGINAL_APPLE has not been used
-                    if (!isset($mappedData[Exif::CREATION_DATE])) {
+                    if (!isset($mappedData[Exif::CREATION_DATE])
+                            && preg_match('/^0000[-:]00[-:]00.00:00:00/', $value) === 0) {
                         try {
                             if (isset($data['ExifIFD:OffsetTimeOriginal'])) {
                                 try {
@@ -248,6 +251,9 @@ class Exiftool implements MapperInterface
 
                     break;
                 case self::DATETIMEORIGINAL_APPLE:
+                    if (preg_match('/^0000[-:]00[-:]00.00:00:00/', $value) === 1) {
+                        continue 2;
+                    }
                     try {
                         $value = new DateTime($value);
                     } catch (\Exception $e) {
@@ -347,10 +353,11 @@ class Exiftool implements MapperInterface
                 // Merge sources of keywords
                 case self::KEYWORDS:
                 case self::SUBJECT:
+                    $xval = is_array($value) ? $value : [$value];
                     if (empty($mappedData[Exif::KEYWORDS])) {
-                        $mappedData[Exif::KEYWORDS] = $value;
+                        $mappedData[Exif::KEYWORDS] = $xval;
                     } else {
-                        $tmp = array_values(array_unique(array_merge($mappedData[Exif::KEYWORDS], $value)));
+                        $tmp = array_values(array_unique(array_merge($mappedData[Exif::KEYWORDS], $xval)));
                         $mappedData[Exif::KEYWORDS] = $tmp;
                     }
 
@@ -385,7 +392,7 @@ class Exiftool implements MapperInterface
      * Extract GPS coordinates from formatted string
      *
      * @param string $coordinates
-     * @return array
+     * @return float|false
      */
     protected function extractGPSCoordinates($coordinates)
     {

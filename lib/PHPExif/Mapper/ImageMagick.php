@@ -114,7 +114,8 @@ class ImageMagick implements MapperInterface
                     $value = sprintf('f/%01.1f', $this->normalizeComponent($value));
                     break;
                 case self::CREATION_DATE:
-                    if (!isset($mappedData[Exif::CREATION_DATE])) {
+                    if (!isset($mappedData[Exif::CREATION_DATE])
+                            && preg_match('/^0000[-:]00[-:]00.00:00:00/', $value) === 0) {
                         try {
                             $value = new \DateTime($value);
                         } catch (\Exception $e) {
@@ -125,6 +126,9 @@ class ImageMagick implements MapperInterface
                     }
                     break;
                 case self::DATETIMEORIGINAL:
+                    if (preg_match('/^0000[-:]00[-:]00.00:00:00/', $value) === 1) {
+                        continue 2;
+                    }
                     try {
                         if (isset($data['exif:OffsetTimeOriginal'])) {
                             try {
@@ -250,7 +254,8 @@ class ImageMagick implements MapperInterface
             return (float) $parts[0];
         }
         // case part[1] is 0, div by 0 is forbidden.
-        if ($parts[1] == 0) {
+        // Catch case of one entry not being numeric
+        if ($parts[1] == 0 || !is_numeric($parts[0]) || !is_numeric($parts[1])) {
             return (float) 0;
         }
         return (float) $parts[0] / $parts[1];

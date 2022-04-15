@@ -49,7 +49,7 @@ class ExiftoolMapperTest extends \PHPUnit\Framework\TestCase
         unset($map[\PHPExif\Mapper\Exiftool::FOCALLENGTH]);
         unset($map[\PHPExif\Mapper\Exiftool::GPSLATITUDE]);
         unset($map[\PHPExif\Mapper\Exiftool::GPSLONGITUDE]);
-        unset($map[\PHPExif\Mapper\Exiftool::CAPTION]);
+        unset($map[\PHPExif\Mapper\Exiftool::CAPTIONABSTRACT]);
         unset($map[\PHPExif\Mapper\Exiftool::TITLE]);
         unset($map[\PHPExif\Mapper\Exiftool::DESCRIPTION_XMP]);
         unset($map[\PHPExif\Mapper\Exiftool::CONTENTIDENTIFIER]);
@@ -74,9 +74,11 @@ class ExiftoolMapperTest extends \PHPUnit\Framework\TestCase
         unset($map[\PHPExif\Mapper\Exiftool::DURATION_QUICKTIME]);
         unset($map[\PHPExif\Mapper\Exiftool::DURATION_WEBM]);
         unset($map[\PHPExif\Mapper\Exiftool::DURATION_WMV]);
+        unset($map[\PHPExif\Mapper\Exiftool::CONTENTIDENTIFIER_KEYS]);
         unset($map[\PHPExif\Mapper\Exiftool::GPSLATITUDE_QUICKTIME]);
         unset($map[\PHPExif\Mapper\Exiftool::GPSLONGITUDE_QUICKTIME]);
         unset($map[\PHPExif\Mapper\Exiftool::GPSALTITUDE_QUICKTIME]);
+        unset($map[\PHPExif\Mapper\Exiftool::MEDIA_GROUP_UUID]);
         unset($map[\PHPExif\Mapper\Exiftool::MICROVIDEOOFFSET]);
         unset($map[\PHPExif\Mapper\Exiftool::CITY]);
         unset($map[\PHPExif\Mapper\Exiftool::SUBLOCATION]);
@@ -729,7 +731,7 @@ class ExiftoolMapperTest extends \PHPUnit\Framework\TestCase
         $mapped = $this->mapper->mapRawData($rawData);
 
         $this->assertEquals(
-            'Keyword_1 Keyword_2',
+            ['Keyword_1 Keyword_2'],
             reset($mapped)
         );
     }
