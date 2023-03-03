@@ -109,8 +109,7 @@ class Exiftool extends AdapterAbstract
     public function getToolPath()
     {
         if (empty($this->toolPath)) {
-            // Do not use "which": not available on sh
-            
+            // Do not use "which": not available on sh           
             switch(self::TOOL_NAME) {
                 case 'ffprobe':
                     $path = config('defines.FFPROBE_BIN');        
@@ -119,7 +118,8 @@ class Exiftool extends AdapterAbstract
                     $path = config('defines.FFMPEG_BIN');        
                     break; 
                 default: 
-                    $path = exec('command -v ' . self::TOOL_NAME);
+                    //$path = exec('command -v ' . self::TOOL_NAME);
+                    $path = config('defines.EXIFTOOL_BIN');
             }
 
             $this->setToolPath($path);
